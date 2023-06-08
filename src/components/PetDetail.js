@@ -1,9 +1,54 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import petsData from "../petsData";
 import { useParams } from "react-router-dom";
+import { deletePetById, getPetById, getPets, updatePet } from "../api/pets";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 const PetDetail = () => {
   const { petId } = useParams();
-  const pet = petsData.find((pet) => pet.id == petId);
+  // const [pet, setPet] = useState({});
+
+  const queryClient = useQueryClient();
+
+  const { data: pet } = useQuery({
+    queryKey: ["pet"],
+    queryFn: () => getPetById(petId),
+  });
+
+  console.log(pet);
+  const mutation = useMutation({
+    mutationFn: () => deletePetById(pet.id),
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["pet"] });
+    },
+  });
+
+  const mutation2 = useMutation({
+    mutationFn: () => updatePet(pet.id, pet.name, pet.image, pet.type),
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["pet"] });
+    },
+  });
+
+  // const callApi = async () => {
+  //   const res = await getPetById(petId);
+  //   setPet(res);
+  // };
+
+  const handleDelete = () => {
+    mutation.mutate();
+  };
+
+  const handleUpdate = () => {
+    mutation2.mutate();
+  };
+
+  // useEffect(() => {
+  //   callApi();
+  // }, []);
+
   if (!pet) {
     return <h1>{`There is no pet with the id: ${petId}`}</h1>;
   }
@@ -22,11 +67,17 @@ const PetDetail = () => {
           <h1>Type: {pet.type}</h1>
           <h1>adopted: {pet.adopted}</h1>
 
-          <button className="w-[70px] border border-black rounded-md  hover:bg-green-400 mb-5">
-            Adobt
+          <button
+            onClick={handleUpdate}
+            className="w-[70px] border border-black rounded-md  hover:bg-green-400 mb-5"
+          >
+            Adopt
           </button>
 
-          <button className="w-[70px] border border-black rounded-md  hover:bg-red-400">
+          <button
+            onClick={handleDelete}
+            className="w-[70px] border border-black rounded-md  hover:bg-red-400"
+          >
             Delete
           </button>
         </div>
