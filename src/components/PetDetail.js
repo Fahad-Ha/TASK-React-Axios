@@ -16,7 +16,7 @@ const PetDetail = () => {
   });
 
   console.log(pet);
-  const mutation = useMutation({
+  const { mutate: deletePet } = useMutation({
     mutationFn: () => deletePetById(pet.id),
     onSuccess: () => {
       // Invalidate and refetch
@@ -24,7 +24,7 @@ const PetDetail = () => {
     },
   });
 
-  const mutation2 = useMutation({
+  const { mutate: update } = useMutation({
     mutationFn: () => updatePet(pet.id, pet.name, pet.image, pet.type),
     onSuccess: () => {
       // Invalidate and refetch
@@ -38,11 +38,11 @@ const PetDetail = () => {
   // };
 
   const handleDelete = () => {
-    mutation.mutate();
+    deletePet();
   };
 
   const handleUpdate = () => {
-    mutation2.mutate();
+    update();
   };
 
   // useEffect(() => {
